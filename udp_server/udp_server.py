@@ -1,14 +1,17 @@
 import socket
+import serial
 import json
 import logging
 
-def keyDown():
-  """Executes 'function_a'."""
+def keyDown(port):
+  """CW key pressed"""
+  port.dtr = True
   logging.info("Key pressed.")
   return 0  # 0 for success
 
-def keyUp():
-  """Executes 'function_b'."""
+def keyUp(port):
+  """CW key released"""
+  port.dtr = False
   logging.info("Key released.")
   return 0  # 0 for success
 
@@ -21,7 +24,7 @@ def load_config():
   try:
     with open('server_config.json', 'r') as f:
       config = json.load(f)
-      return config['host'], config['port']
+      return config['host'], config['port'], config['serial_port']
   except (FileNotFoundError, KeyError) as e:
     logging.error(f"Error loading server config: {e}")
     return None, None
@@ -35,8 +38,10 @@ def run_server():
     datefmt='%Y-%m-%d %H:%M:%S'
   )
   
-  host, port = load_config()
-  if not host or not port:
+  
+
+  host, port, serial_port = load_config()
+  if not host or not port or not serial_port:
     return
 
   # Dictionary to map commands to functions
@@ -49,10 +54,17 @@ def run_server():
   # Create a UDP socket
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   
+  # Open serial port for DTR CW sending
+  logging.info(f"Initializing serial port {serial_port}")
+  serial_ifce = serial.Serial(serial_port, 115200)
+  serial_ifce.rts = serial_ifce.dtr = False 
+  
+  
   # Bind the socket to the host and port
   server_address = (host, port)
   logging.info(f"Starting UDP server on {host}:{port}")
   sock.bind(server_address)
+
 
   try:
     while True:
@@ -62,7 +74,7 @@ def run_server():
       logging.debug(f"Received command '{command}' from {address}")
 
       if command in commands:
-        commands[command]()
+        commands[command](serial_ifce)
         response = b'0'  # Success
       else:
         response = b'1'  # Failure
