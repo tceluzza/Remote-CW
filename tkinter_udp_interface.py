@@ -8,11 +8,6 @@ class App:
     
     # Initialize the UdpClient
     self.client = UdpClient(config_file='udp_server/client_config.json')
-    # if not self.client.sock:
-    #   # If the client failed to initialize, disable the button
-    #   print("Client failed to initialize. Please check client_config.json.")
-    #   self.button = tk.Button(master, text="Connection Error", state=tk.DISABLED)
-    # else:
     self.button = tk.Button(master, text="THIS IS A STRAIGHT KEY (I swear)", width=20, height=5)
       
     # Bind mouse events to the button
