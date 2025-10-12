@@ -27,7 +27,7 @@ def load_config():
       return config['host'], config['port'], config['serial_port']
   except (FileNotFoundError, KeyError) as e:
     logging.error(f"Error loading server config: {e}")
-    return None, None
+    return None, None, None
 
 def run_server():
   """Runs the UDP server."""
@@ -46,8 +46,8 @@ def run_server():
 
   # Dictionary to map commands to functions
   commands = {
-    "keydown": keyDown,
-    "keyup": keyUp,
+    "key_down": keyDown,
+    "key_up": keyUp,
     "status": status
   }
 
